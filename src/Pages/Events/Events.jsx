@@ -14,6 +14,7 @@ import ReactTable from "../../Templates/Table";
 import EventDetails from "./EventDetails";
 import EditEvent from "./EditEvent";
 import DeleteEvent from "./DeleteEvent";
+import { formatDate } from "../../../utils/utilityFunctions";
 
 const Events = () => {
   const dispatch = useDispatch();
@@ -22,6 +23,15 @@ const Events = () => {
   useEffect(() => {
     dispatch(fetchEvents());
   }, []);
+
+  const columnHeaders = [
+    "Sr no",
+    "Name",
+    "Date",
+    "Location",
+    "Volunteers required",
+    "Actions",
+  ];
 
   const tableColumns = [
     {
@@ -36,6 +46,7 @@ const Events = () => {
     {
       Header: "Date",
       accessor: "date",
+      Cell: ({ row }) => formatDate(row.original.date?.slice(0, 10)),
     },
     {
       Header: "Location",
@@ -44,10 +55,6 @@ const Events = () => {
     {
       Header: "Volunteers required",
       accessor: "volunteersNumber",
-    },
-    {
-      Header: "Volunteer Roles",
-      accessor: "volunteerRoles",
     },
     {
       Header: "Actions",
@@ -74,16 +81,6 @@ const Events = () => {
     useSortBy,
     usePagination
   );
-
-  const columnHeaders = [
-    "Sr no",
-    "Name",
-    "Age",
-    "Gender",
-    "Medical History",
-    "Assigned Ward",
-    "Actions",
-  ];
 
   return (
     <div>
