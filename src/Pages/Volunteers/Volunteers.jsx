@@ -9,6 +9,7 @@ import {
 
 import SkeletonTable from "../../Templates/SkeletonTable";
 import { fetchVolunteers } from "../../Features/volunteerSlice";
+import { fetchEvents } from "../../Features/eventSlice";
 import AddVolunteer from "./AddVolunteer";
 import ReactTable from "../../Templates/Table";
 import VolunteerDetails from "./VolunteerDetails";
@@ -21,12 +22,12 @@ const Volunteers = () => {
 
   useEffect(() => {
     dispatch(fetchVolunteers());
+    dispatch(fetchEvents());
   }, []);
 
   const tableColumns = [
     {
       Header: "Sr no.",
-      accessor: "job_id",
       Cell: ({ row }) => row.index + 1,
     },
     {
@@ -34,20 +35,51 @@ const Volunteers = () => {
       accessor: "name",
     },
     {
-      Header: "Date",
-      accessor: "date",
+      Header: "Contact",
+      accessor: "contact",
     },
     {
-      Header: "Location",
-      accessor: "location",
+      Header: "Availability",
+      accessor: "availability",
     },
     {
-      Header: "Volunteers required",
-      accessor: "volunteersNumber",
+      Header: "Roles",
+      accessor: "roles",
+      Cell: ({ row }) => (
+        <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
+          {row.original.roles?.map((role) => (
+            <p className="m-0 role badge" key={role}>
+              {role}
+            </p>
+          ))}
+        </div>
+      ),
     },
     {
-      Header: "Volunteer Roles",
-      accessor: "volunteerRoles",
+      Header: "Skills",
+      accessor: "skills",
+      Cell: ({ row }) => (
+        <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
+          {row.original.skills?.map((skill) => (
+            <p className="m-0 role badge" key={skill}>
+              {skill}
+            </p>
+          ))}
+        </div>
+      ),
+    },
+    {
+      Header: "Interests",
+      accessor: "interests",
+      Cell: ({ row }) => (
+        <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
+          {row.original.interests?.map((interest) => (
+            <p className="m-0 role badge" key={interest}>
+              {interest}
+            </p>
+          ))}
+        </div>
+      ),
     },
     {
       Header: "Actions",
@@ -78,10 +110,11 @@ const Volunteers = () => {
   const columnHeaders = [
     "Sr no",
     "Name",
-    "Age",
-    "Gender",
-    "Medical History",
-    "Assigned Ward",
+    "Contact",
+    "Availability",
+    "Roles",
+    "Skills",
+    "Interests",
     "Actions",
   ];
 
