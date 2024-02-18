@@ -89,8 +89,6 @@ function MyVerticallyCenteredModal({ show, onHide, oldVolunteer }) {
       newVolunteerDetails.roles = joinData(volunteer?.roles);
       newVolunteerDetails.skills = joinData(volunteer?.skills);
 
-      console.log("newVolunteerDetails: ", newVolunteerDetails);
-
       dispatch(
         updateVolunteer({
           id: oldVolunteer._id,
@@ -250,7 +248,6 @@ const EditVolunteer = ({ volunteer }) => {
     <>
       <button
         onClick={() => {
-          console.log("volunteer: ", volunteer);
           setModalShow(true);
         }}
         className="custom-btn"

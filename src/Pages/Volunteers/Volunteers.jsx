@@ -133,7 +133,7 @@ const Volunteers = () => {
             <ReactTable tableInstance={tableInstance} />
           </>
         ) : (
-          <p className="mt-4 fs-5 text-start">No data found!</p>
+          <p className="mt-4 fs-5 text-start">No Volunteers found!</p>
         )}
       </div>
     </div>

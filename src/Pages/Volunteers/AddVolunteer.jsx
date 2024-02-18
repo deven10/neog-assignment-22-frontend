@@ -225,7 +225,6 @@ const AddVolunteer = ({ events }) => {
     <>
       <button
         onClick={() => {
-          console.log("events ::", events);
           setModalShow(true);
         }}
         className="custom-btn"

@@ -31,7 +31,7 @@ const Events = () => {
     "Name",
     "Date",
     "Location",
-    "Volunteers required",
+    "Volunteers Required",
     "Actions",
   ];
 
@@ -56,7 +56,11 @@ const Events = () => {
     },
     {
       Header: "Volunteers required",
-      accessor: "volunteersNumber",
+      Cell: ({ row }) =>
+        row.original.roles.reduce(
+          (acc, { volunteersRequired }) => (acc += +volunteersRequired),
+          0
+        ),
     },
     {
       Header: "Actions",
@@ -98,7 +102,7 @@ const Events = () => {
             <ReactTable tableInstance={tableInstance} />
           </>
         ) : (
-          <p className="mt-4 fs-5 text-start">No data found!</p>
+          <p className="mt-4 fs-5 text-start">No Events found!</p>
         )}
       </div>
     </div>

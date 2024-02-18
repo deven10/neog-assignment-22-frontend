@@ -23,9 +23,36 @@ function MyVerticallyCenteredModal({ show, onHide }) {
     date: "",
     location: "",
     description: "",
-    volunteersNumber: "",
-    volunteerRoles: [],
+    roles: [
+      {
+        role: "",
+        volunteersRequired: "",
+      },
+    ],
   });
+
+  const handleRole = (value, index) => {
+    const updatedRoles = event.roles.map((role, i) =>
+      i === index
+        ? { role: value, volunteersRequired: role.volunteersRequired }
+        : role
+    );
+    setEvent((prev) => ({
+      ...prev,
+      roles: updatedRoles,
+    }));
+  };
+  const handleVolunteersRequired = (value, index) => {
+    const updatedVolunteersRequired = event.roles.map((singleRole, i) =>
+      i === index
+        ? { role: singleRole.role, volunteersRequired: value }
+        : singleRole
+    );
+    setEvent((prev) => ({
+      ...prev,
+      roles: updatedVolunteersRequired,
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,42 +61,36 @@ function MyVerticallyCenteredModal({ show, onHide }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const {
-      name,
-      date,
-      location,
-      description,
-      volunteersNumber,
-      volunteerRoles,
-    } = event;
+    const { name, date, location, description, roles } = event;
 
     const bool =
-      [name, date, location, description, volunteersNumber].every((a) =>
-        Boolean(a.trim())
-      ) && volunteerRoles.length > 0;
-
-    if (bool) {
-      const newEventDetails = { ...event };
-      delete newEventDetails.volunteerRoles;
-      newEventDetails.volunteerRoles = event.volunteerRoles.map(
-        (role) => role.value
+      [name, date, location, description].every((a) => Boolean(a.trim())) &&
+      roles.every(
+        ({ role, volunteersRequired }) =>
+          Boolean(role.trim()) && Boolean(volunteersRequired.toString())
       );
 
-      dispatch(addEvent(newEventDetails));
+    if (bool) {
+      dispatch(addEvent(event));
       onHide();
       setEvent({
         name: "",
         date: "",
         location: "",
         description: "",
-        volunteersNumber: "",
-        volunteerRoles: [],
+        roles: [
+          {
+            role: "",
+            volunteersRequired: "",
+          },
+        ],
       });
     } else {
       const conditions = {
-        [!volunteerRoles.length > 0]: "Please add atleast 1 volunteer role",
-        [!Boolean(volunteersNumber.trim())]:
-          "Please enter required volunteer count",
+        [!roles.every(
+          ({ role, volunteersRequired }) =>
+            Boolean(role.trim()) && Boolean(volunteersRequired.toString())
+        )]: "Please enter role & required volunteers, else remove the role",
         [!Boolean(description.trim())]: "Please enter event description",
         [!Boolean(location.trim())]: "Please enter event location",
         [!Boolean(date.trim())]: "Please enter event date",
@@ -87,7 +108,7 @@ function MyVerticallyCenteredModal({ show, onHide }) {
       <Modal.Body>
         <form
           onSubmit={handleSubmit}
-          className="d-flex w-75 m-auto flex-column justify-content-center align-items-center gap-2"
+          className="d-flex w-100 m-auto flex-column justify-content-center align-items-center gap-2"
         >
           <div className="d-flex flex-column w-100">
             <label htmlFor="name">Name: </label>
@@ -138,36 +159,58 @@ function MyVerticallyCenteredModal({ show, onHide }) {
             />
           </div>
           <div className="d-flex flex-column w-100">
-            <label htmlFor="volunteersNumber">Volunteers Required:</label>
-            <input
-              type="number"
-              id="volunteersNumber"
-              name="volunteersNumber"
-              placeholder="Volunteers Required"
-              value={event.volunteersNumber}
-              onChange={(e) => handleChange(e)}
-              min={1}
-              required
-            />
-          </div>
-          <div className="d-flex flex-column w-100">
             <label htmlFor="volunteerRoles">Volunteer Roles:</label>
-            <CreatableSelect
-              closeMenuOnSelect={false}
-              components={animatedComponents}
-              isMulti
-              options={volunteerRoleOptions}
-              isClearable
-              onChange={(option) => {
+            {event.roles.map((role, index) => (
+              <div className="d-flex gap-2 mb-2" key={index}>
+                <input
+                  className="w-100"
+                  type="text"
+                  placeholder="Role"
+                  value={role.role}
+                  onChange={(e) => handleRole(e.target.value, index)}
+                  required
+                />
+                <input
+                  className="w-100"
+                  type="number"
+                  min={1}
+                  placeholder="volunteers required"
+                  value={role.volunteersRequired}
+                  onChange={(e) =>
+                    handleVolunteersRequired(e.target.value, index)
+                  }
+                  required
+                />
+                {event.roles.length > 1 && (
+                  <button
+                    className="btn btn-dark"
+                    style={{ width: "max-content" }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setEvent((prev) => ({
+                        ...prev,
+                        roles: prev.roles.filter((r, i) => i !== index),
+                      }));
+                    }}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              className="btn btn-dark mt-1"
+              style={{ width: "max-content" }}
+              onClick={(e) => {
+                e.preventDefault();
                 setEvent((prev) => ({
                   ...prev,
-                  volunteerRoles: option,
+                  roles: [...prev.roles, { role: "", volunteersRequired: "" }],
                 }));
               }}
-              name="volunteerRoles"
-              value={event.volunteerRoles}
-              placeholder="Type something and press enter..."
-            />
+            >
+              Add Role
+            </button>
           </div>
 
           <button className="btn btn-dark mt-2">Add New Event</button>
