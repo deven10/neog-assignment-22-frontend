@@ -120,7 +120,7 @@ function MyVerticallyCenteredModal({ show, onHide, oldVolunteer }) {
       <Modal.Body>
         <form
           onSubmit={handleSubmit}
-          className="d-flex w-75 m-auto flex-column justify-content-center align-items-center gap-2"
+          className="d-flex w-100 m-auto flex-column justify-content-center align-items-center gap-2"
         >
           <div className="d-flex flex-column w-100">
             <label htmlFor="name">Name: </label>
