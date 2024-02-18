@@ -19,6 +19,7 @@ import DeleteVolunteer from "./DeleteVolunteer";
 const Volunteers = () => {
   const dispatch = useDispatch();
   const { loading, volunteers } = useSelector((state) => state?.volunteers);
+  const { events } = useSelector((state) => state?.events);
 
   useEffect(() => {
     dispatch(fetchVolunteers());
@@ -122,7 +123,7 @@ const Volunteers = () => {
     <div>
       <h4>Volunteers</h4>
       <div className="d-flex justify-content-start">
-        <AddVolunteer />
+        <AddVolunteer events={events} />
       </div>
       <div className="w-100 mt-3">
         {loading ? (

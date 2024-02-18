@@ -9,6 +9,7 @@ import {
 
 import SkeletonTable from "../../Templates/SkeletonTable";
 import { fetchEvents } from "../../Features/eventSlice";
+import { fetchVolunteers } from "../../Features/volunteerSlice";
 import AddEvent from "./AddEvent";
 import ReactTable from "../../Templates/Table";
 import EventDetails from "./EventDetails";
@@ -22,6 +23,7 @@ const Events = () => {
 
   useEffect(() => {
     dispatch(fetchEvents());
+    dispatch(fetchVolunteers());
   }, []);
 
   const columnHeaders = [

@@ -76,7 +76,7 @@ function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
           </p>
           <ul className="mt-1">
             {volunteerEvents?.map((event) => (
-              <li key={event}>
+              <li key={event._id} className="mb-2">
                 <h5 className="m-0" style={{ fontWeight: "600" }}>
                   {event.name}
                 </h5>
