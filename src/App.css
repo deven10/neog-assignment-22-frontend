@@ -88,3 +88,7 @@ select {
   color: #111;
   font-weight: 500;
 }
+
+.flex-1 {
+  flex: 1;
+}

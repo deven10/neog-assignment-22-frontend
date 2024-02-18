@@ -72,7 +72,7 @@ function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
         </div>
         <div className="text-start d-flex flex-column justify-content-start mt-2">
           <p className="m-0" style={{ fontWeight: "600" }}>
-            Events:
+            Events Assigned:
           </p>
           <ul className="mt-1">
             {volunteerEvents?.map((event) => (

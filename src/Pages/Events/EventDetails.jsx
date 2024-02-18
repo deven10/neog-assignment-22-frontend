@@ -1,8 +1,19 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Modal from "react-bootstrap/Modal";
 import { formatDate } from "../../../utils/utilityFunctions";
+import { useSelector } from "react-redux";
 
 function MyVerticallyCenteredModal({ show, onHide, event }) {
+  const { volunteers } = useSelector((state) => state?.volunteers);
+  const assignedVolunteers = useMemo(() => {
+    const result = volunteers?.filter((volunteer) => {
+      if (volunteer?.events?.includes(event._id)) {
+        return volunteer;
+      }
+    });
+    return result;
+  }, [volunteers, event._id]);
+
   return (
     <Modal show={show} onHide={onHide} size="md" centered>
       <Modal.Body className="text-center px-4">
@@ -47,6 +58,16 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
             ))}
           </div>
         </div>
+        <div className="text-start d-flex flex-column justify-content-start mt-2">
+          <p className="m-0" style={{ fontWeight: "600" }}>
+            Volunteers Registered:
+          </p>
+          <ul className="mt-1">
+            {assignedVolunteers?.map((volunteer) => (
+              <li key={volunteer._id}>{volunteer?.name}</li>
+            ))}
+          </ul>
+        </div>
 
         <button className="custom-btn mt-3" onClick={onHide}>
           Close
@@ -61,7 +82,12 @@ const EventDetails = ({ event }) => {
 
   return (
     <>
-      <button onClick={() => setModalShow(true)} className="custom-btn">
+      <button
+        onClick={() => {
+          setModalShow(true);
+        }}
+        className="custom-btn"
+      >
         Details
       </button>
 
