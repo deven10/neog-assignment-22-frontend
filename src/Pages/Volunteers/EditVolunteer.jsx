@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,15 +33,26 @@ function MyVerticallyCenteredModal({ show, onHide, oldVolunteer }) {
     roles: createOptions(oldVolunteer?.roles),
     skills: createOptions(oldVolunteer?.skills),
     interests: createOptions(oldVolunteer?.interests),
-    events: oldVolunteer?.events?.map((eventId) => {
+    events: [],
+  });
+
+  // setting default events
+  useEffect(() => {
+    const defaultEvents = oldVolunteer?.events?.map((eventId) => {
       const eventAssigned = events?.find((event) => event._id === eventId);
       return {
         label: eventAssigned?.name,
         value: eventAssigned?._id,
       };
-    }),
-  });
+    });
 
+    setVolunteer((prev) => ({
+      ...prev,
+      events: defaultEvents,
+    }));
+  }, [events, oldVolunteer?.events]);
+
+  // creating events options using all events data
   const eventOptions = useMemo(() => {
     return events?.map((event) => ({
       label: event?.name,
@@ -60,8 +71,9 @@ function MyVerticallyCenteredModal({ show, onHide, oldVolunteer }) {
       volunteer;
 
     const bool =
-      [name, contact, availability].every((a) => Boolean(a.trim())) &&
-      [roles, skills, interests, events].every((a) => a.length > 0);
+      [name, contact.toString(), availability].every((a) =>
+        Boolean(a?.trim())
+      ) && [roles, skills, interests, events].every((a) => a.length > 0);
 
     if (bool) {
       const newVolunteerDetails = { ...volunteer };
@@ -71,27 +83,26 @@ function MyVerticallyCenteredModal({ show, onHide, oldVolunteer }) {
       delete newVolunteerDetails.skills;
 
       const joinData = (dataset) => dataset.map((data) => data.value);
+
       newVolunteerDetails.events = joinData(volunteer?.events);
       newVolunteerDetails.interests = joinData(volunteer?.interests);
       newVolunteerDetails.roles = joinData(volunteer?.roles);
       newVolunteerDetails.skills = joinData(volunteer?.skills);
 
-      dispatch(addVolunteer(newVolunteerDetails));
+      console.log("newVolunteerDetails: ", newVolunteerDetails);
+
+      dispatch(
+        updateVolunteer({
+          id: oldVolunteer._id,
+          newVolunteer: newVolunteerDetails,
+        })
+      );
       onHide();
-      setVolunteer({
-        name: "",
-        contact: "",
-        availability: "",
-        roles: "",
-        skills: "",
-        interests: "",
-        events: "",
-      });
     } else {
       const conditions = {
+        [!events.length > 0]: "Please add atleast 1 event",
         [!interests.length > 0]: "Please add atleast 1 interest",
         [!skills.length > 0]: "Please add atleast 1 skill",
-        [!events.length > 0]: "Please add atleast 1 event",
         [!roles.length > 0]: "Please add atleast 1 volunteer role",
         [!Boolean(availability.trim())]: "Please enter volunteer availability",
         [!Boolean(contact.trim())]: "Please enter volunteer contact",
