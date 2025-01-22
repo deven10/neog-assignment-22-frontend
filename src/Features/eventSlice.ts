@@ -1,94 +1,122 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { Event } from "../types/eventTypes";
 
-const initialState = {
+type initialStateType = {
+  events: Event[];
+  loading: boolean;
+  error: string;
+};
+
+const initialState: initialStateType = {
   events: [],
   loading: false,
-  error: null,
+  error: "",
 };
 
 const url = `https://neog-assignment-22-backend.onrender.com/api/event`;
 
 // read all Events
-export const fetchEvents = createAsyncThunk(
-  "events/fetchEvents",
-  async (args, { rejectWithValue }) => {
-    try {
-      const result = await axios.get(url, {
+export const fetchEvents = createAsyncThunk<
+  Event[], // Success type
+  void, // Argument type (args)
+  { rejectValue: string } // Rejected value type
+>("events/fetchEvents", async (args, { rejectWithValue }) => {
+  try {
+    const result = await axios.get(url, {
+      headers: {
         "Content-Type": "application/json",
-      });
+      },
+    });
 
-      if (result.status === 200) {
-        return result.data.events;
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return rejectWithValue(e.message);
+    if (result.status === 200) {
+      return result.data.events;
+    } else {
+      return rejectWithValue("Failed to fetch events");
     }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    return rejectWithValue(errorMessage);
   }
-);
+});
 
 // add new event
-export const addEvent = createAsyncThunk(
-  "events/addEvent",
-  async (body, { rejectWithValue }) => {
-    try {
-      const result = await axios.post(url, body, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+export const addEvent = createAsyncThunk<
+  Event, // Success type
+  void, // Argument type (args)
+  { rejectValue: string } // Rejected value type
+>("events/addEvent", async (body, { rejectWithValue }) => {
+  try {
+    const result = await axios.post(url, body, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (result.status === 201) {
-        return result.data.event;
-      }
-    } catch (e) {
-      return rejectWithValue(e.message);
+    if (result.status === 201) {
+      return result.data.event;
+    } else {
+      return rejectWithValue("Failed to add event");
     }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    return rejectWithValue(errorMessage);
   }
-);
+});
+
+interface UpdateEventArgs {
+  id: string;
+  newEvent: Partial<Event>; // Use `Partial` if not all fields of `Event` are required
+}
 
 // updating an existing Events
-export const updateEvent = createAsyncThunk(
-  "events/updateEvent",
-  async (data, { rejectWithValue }) => {
-    try {
-      const result = await axios.post(`${url}/${data.id}`, data.newEvent, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+export const updateEvent = createAsyncThunk<
+  Event, // Success type
+  UpdateEventArgs, // Argument type (args)
+  { rejectValue: string } // Rejected value type
+>("events/updateEvent", async (data, { rejectWithValue }) => {
+  try {
+    const result = await axios.post(`${url}/${data.id}`, data.newEvent, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (result.status === 200) {
-        return result.data.event;
-      }
-    } catch (e) {
-      return rejectWithValue(e.message);
+    if (result.status === 200) {
+      return result.data.event;
+    } else {
+      return rejectWithValue("Failed to update event");
     }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    return rejectWithValue(errorMessage);
   }
-);
+});
 
 // delete an existing student
-export const deleteEvent = createAsyncThunk(
-  "events/deleteEvent",
-  async (eventId, { rejectWithValue }) => {
-    try {
-      const result = await axios.delete(`${url}/${eventId}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+export const deleteEvent = createAsyncThunk<
+  Event, // Success type
+  void, // Argument type (args)
+  { rejectValue: string } // Rejected value type
+>("events/deleteEvent", async (eventId, { rejectWithValue }) => {
+  try {
+    const result = await axios.delete(`${url}/${eventId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (result.status === 200) {
-        return result.data.event;
-      }
-    } catch (e) {
-      return rejectWithValue(e.message);
+    if (result.status === 200) {
+      return result.data.event;
+    } else {
+      return rejectWithValue("Failed to delete event");
     }
+  } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
+    return rejectWithValue(errorMessage);
   }
-);
+});
 
 export const eventSlice = createSlice({
   name: "eventsDetails",
@@ -105,7 +133,7 @@ export const eventSlice = createSlice({
       })
       .addCase(fetchEvents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
         toast.error("Error while fetching all Events!");
       })
       .addCase(addEvent.pending, (state) => {
@@ -118,7 +146,7 @@ export const eventSlice = createSlice({
       })
       .addCase(addEvent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
         toast.error("Error while adding new Event!");
       })
       .addCase(updateEvent.pending, (state) => {
@@ -133,7 +161,7 @@ export const eventSlice = createSlice({
       })
       .addCase(updateEvent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
         toast.error("Error while updating Event!");
       })
       .addCase(deleteEvent.pending, (state) => {
@@ -148,7 +176,7 @@ export const eventSlice = createSlice({
       })
       .addCase(deleteEvent.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload as string;
         toast.error("Error while deleting Event!");
       });
   },

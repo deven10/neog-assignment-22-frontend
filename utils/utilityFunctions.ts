@@ -1,4 +1,4 @@
-export function formatDate(inputDate) {
+export function formatDate(inputDate: String) {
   const months = [
     "Jan",
     "Feb",
@@ -14,7 +14,7 @@ export function formatDate(inputDate) {
     "Dec",
   ];
 
-  const [year, month, day] = inputDate.split("-");
+  const [year, month, day] = inputDate?.split("-");
   const monthName = months[parseInt(month, 10) - 1];
 
   // Add suffix to the day
