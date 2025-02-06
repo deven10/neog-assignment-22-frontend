@@ -6,6 +6,8 @@ import makeAnimated from "react-select/animated";
 
 import { addEvent } from "../../Features/eventSlice";
 import { useState } from "react";
+import { AppDispatch } from "../../Store/store";
+import { Event, Role } from "../../types/eventTypes";
 
 const animatedComponents = makeAnimated();
 
@@ -16,8 +18,14 @@ const volunteerRoleOptions = [
   { label: "Child Taker", value: "Child Taker" },
 ];
 
-function MyVerticallyCenteredModal({ show, onHide }) {
-  const dispatch = useDispatch();
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+}: {
+  show: boolean;
+  onHide: () => void;
+}) {
+  const dispatch = useDispatch<AppDispatch>();
   const [event, setEvent] = useState({
     name: "",
     date: "",
@@ -31,7 +39,7 @@ function MyVerticallyCenteredModal({ show, onHide }) {
     ],
   });
 
-  const handleRole = (value, index) => {
+  const handleRole = (value: string, index: number) => {
     const updatedRoles = event.roles.map((role, i) =>
       i === index
         ? { role: value, volunteersRequired: role.volunteersRequired }
@@ -42,7 +50,8 @@ function MyVerticallyCenteredModal({ show, onHide }) {
       roles: updatedRoles,
     }));
   };
-  const handleVolunteersRequired = (value, index) => {
+
+  const handleVolunteersRequired = (value: string, index: number) => {
     const updatedVolunteersRequired = event.roles.map((singleRole, i) =>
       i === index
         ? { role: singleRole.role, volunteersRequired: value }
@@ -54,12 +63,12 @@ function MyVerticallyCenteredModal({ show, onHide }) {
     }));
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const { name, date, location, description, roles } = event;
 
@@ -86,25 +95,38 @@ function MyVerticallyCenteredModal({ show, onHide }) {
         ],
       });
     } else {
-      const conditions = {
-        [!roles.every(
-          ({ role, volunteersRequired }) =>
-            Boolean(role.trim()) && Boolean(volunteersRequired.toString())
-        )]: "Please enter role & required volunteers, else remove the role",
-        [!Boolean(description.trim())]: "Please enter event description",
-        [!Boolean(location.trim())]: "Please enter event location",
-        [!Boolean(date.trim())]: "Please enter event date",
-        [!Boolean(name.trim())]: "Please enter event name",
+      const validateEvent = () => {
+        if (
+          !roles.every(
+            ({ role, volunteersRequired }) => role.trim() && volunteersRequired
+          )
+        ) {
+          return "Please enter role & required volunteers, or remove the role";
+        }
+        if (!description.trim()) {
+          return "Please enter event description";
+        }
+        if (!location.trim()) {
+          return "Please enter event location";
+        }
+        if (!date.trim()) {
+          return "Please enter event date";
+        }
+        if (!name.trim()) {
+          return "Please enter event name";
+        }
+        return null;
       };
-      const error = conditions[true];
-      if (error) {
-        toast.error(error);
+
+      const validationError = validateEvent();
+      if (validationError) {
+        toast.error(validationError);
       }
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body>
         <form
           onSubmit={handleSubmit}

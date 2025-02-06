@@ -11,7 +11,6 @@ import SkeletonTable from "../../Templates/SkeletonTable";
 import { fetchEvents } from "../../Features/eventSlice";
 import { fetchVolunteers } from "../../Features/volunteerSlice";
 import AddEvent from "./AddEvent";
-import ReactTable from "../../Templates/Table";
 import EventDetails from "./EventDetails";
 import EditEvent from "./EditEvent";
 import DeleteEvent from "./DeleteEvent";
@@ -149,12 +148,10 @@ const Events = () => {
         <AddEvent />
       </div>
       <div className="w-100 mt-3">
-        {/* loading */}
         {loading ? (
           <SkeletonTable columnHeaders={columnHeaders} />
         ) : events?.length > 0 ? (
           <>
-            {/* <ReactTable tableInstance={tableInstance} /> */}
             <TanstackTable data={data} columns={columns} />
           </>
         ) : (

@@ -1,10 +1,19 @@
 import { useState, useMemo } from "react";
 import Modal from "react-bootstrap/Modal";
-import { useSelector } from "react-redux";
 import { formatDate } from "../../../utils/utilityFunctions";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { Volunteer } from "../../types/volunteerTypes";
 
-function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
-  const { events } = useSelector((state) => state?.events);
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+  volunteer,
+}: {
+  show: boolean;
+  onHide: () => void;
+  volunteer: Volunteer;
+}) {
+  const { events } = useAppSelector((state) => state?.events);
 
   const volunteerEvents = useMemo(() => {
     const data = events?.filter((event) =>
@@ -14,7 +23,7 @@ function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
   }, [events, volunteer]);
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body className="text-center px-4">
         <div className="d-flex justify-content-start gap-2 mt-2">
           <p className="m-0" style={{ fontWeight: "600" }}>
@@ -95,7 +104,7 @@ function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
   );
 }
 
-const VolunteerDetails = ({ volunteer }) => {
+const VolunteerDetails = ({ volunteer }: { volunteer: Volunteer }) => {
   const [modalShow, setModalShow] = useState(false);
 
   return (

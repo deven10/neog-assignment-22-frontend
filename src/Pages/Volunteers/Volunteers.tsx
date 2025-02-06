@@ -1,17 +1,9 @@
 import { useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-// import {
-//   useTable,
-//   useGlobalFilter,
-//   useSortBy,
-//   usePagination,
-// } from "react-table";
-
+import { useDispatch } from "react-redux";
 import SkeletonTable from "../../Templates/SkeletonTable";
 import { fetchVolunteers } from "../../Features/volunteerSlice";
 import { fetchEvents } from "../../Features/eventSlice";
 import AddVolunteer from "./AddVolunteer";
-import ReactTable from "../../Templates/Table";
 import VolunteerDetails from "./VolunteerDetails";
 import EditVolunteer from "./EditVolunteer";
 import DeleteVolunteer from "./DeleteVolunteer";
@@ -20,9 +12,6 @@ import { AppDispatch } from "../../Store/store";
 import { createColumnHelper } from "@tanstack/react-table";
 import { Volunteer } from "../../types/volunteerTypes";
 import TanstackTable from "../../Templates/TanstackTable";
-import EventDetails from "../Events/EventDetails";
-import EditEvent from "../Events/EditEvent";
-import DeleteEvent from "../Events/DeleteEvent";
 
 const Volunteers = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -34,90 +23,9 @@ const Volunteers = () => {
     dispatch(fetchEvents());
   }, []);
 
-  // const tableColumns = [
-  //   {
-  //     Header: "Sr no.",
-  //     Cell: ({ row }) => row.index + 1,
-  //   },
-  //   {
-  //     Header: "Name",
-  //     accessor: "name",
-  //   },
-  //   {
-  //     Header: "Contact",
-  //     accessor: "contact",
-  //   },
-  //   {
-  //     Header: "Availability",
-  //     accessor: "availability",
-  //   },
-  // {
-  //   Header: "Roles",
-  //   accessor: "roles",
-  //   Cell: ({ row }) => (
-  //     <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-  //       {row.original.roles?.map((role) => (
-  //         <p className="m-0 role badge" key={role}>
-  //           {role}
-  //         </p>
-  //       ))}
-  //     </div>
-  //   ),
-  // },
-  //   {
-  //     Header: "Skills",
-  //     accessor: "skills",
-  //     Cell: ({ row }) => (
-  //       <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-  //         {row.original.skills?.map((skill) => (
-  //           <p className="m-0 role badge" key={skill}>
-  //             {skill}
-  //           </p>
-  //         ))}
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     Header: "Interests",
-  //     accessor: "interests",
-  //     Cell: ({ row }) => (
-  //       <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-  //         {row.original.interests?.map((interest) => (
-  //           <p className="m-0 role badge" key={interest}>
-  //             {interest}
-  //           </p>
-  //         ))}
-  //       </div>
-  //     ),
-  //   },
-  // {
-  //   Header: "Actions",
-  //   accessor: "actions",
-  //   Cell: ({ row }) => (
-  //     <div className="d-flex justify-content-center gap-2">
-  //       <VolunteerDetails volunteer={row.original} />
-  //       <EditVolunteer volunteer={row.original} />
-  //       <DeleteVolunteer volunteer={row.original} />
-  //     </div>
-  //   ),
-  // },
-  // ];
-
-  // const columns2 = useMemo(() => tableColumns, []);
   const data = useMemo(() => {
-    console.log("volunteers: ", volunteers);
     return volunteers;
   }, [volunteers]);
-
-  // const tableInstance = useTable(
-  //   {
-  //     columns,
-  //     data,
-  //   },
-  //   useGlobalFilter,
-  //   useSortBy,
-  //   usePagination
-  // );
 
   const columnHeaders = [
     "Sr no",
@@ -155,7 +63,7 @@ const Volunteers = () => {
       header: "Roles",
       cell: ({ row }) => (
         <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-          {row.original.roles?.map((role) => (
+          {row.original.roles?.map((role: string) => (
             <p className="m-0 role badge" key={`${role}`}>
               {role}
             </p>
@@ -167,7 +75,7 @@ const Volunteers = () => {
       header: "Skills",
       cell: ({ row }) => (
         <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-          {row.original.skills?.map((skill) => (
+          {row.original.skills?.map((skill: string) => (
             <p className="m-0 role badge" key={`${skill}`}>
               {skill}
             </p>
@@ -179,7 +87,7 @@ const Volunteers = () => {
       header: "Interests",
       cell: ({ row }) => (
         <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
-          {row.original.interests?.map((interest) => (
+          {row.original.interests?.map((interest: string) => (
             <p className="m-0 role badge" key={`${interest}`}>
               {interest}
             </p>
@@ -191,7 +99,28 @@ const Volunteers = () => {
       cell: ({ row }) => (
         <div className="d-flex justify-content-center gap-2">
           <VolunteerDetails volunteer={row.original} />
-          <EditVolunteer volunteer={row.original} />
+          <EditVolunteer
+            volunteer={{
+              ...row.original,
+              roles: row.original.roles.map((role) => ({
+                label: role,
+                value: role,
+              })),
+              skills: row.original.skills.map((skill) => ({
+                label: skill,
+                value: skill,
+              })),
+              interests: row.original.interests.map((interest) => ({
+                label: interest,
+                value: interest,
+              })),
+              events: row.original.events?.map((event) => ({
+                label: typeof event === "string" ? event : event.name, // Handle both string & Event type
+                value: typeof event === "string" ? event : event._id,
+              })),
+            }}
+          />
+
           <DeleteVolunteer volunteer={row.original} />
         </div>
       ),
@@ -210,7 +139,6 @@ const Volunteers = () => {
           <SkeletonTable columnHeaders={columnHeaders} />
         ) : volunteers?.length > 0 ? (
           <>
-            {/* <ReactTable tableInstance={tableInstance} /> */}
             <TanstackTable data={data} columns={columns} />
           </>
         ) : (

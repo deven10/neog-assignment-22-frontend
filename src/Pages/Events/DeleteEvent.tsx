@@ -2,16 +2,26 @@ import { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { useDispatch } from "react-redux";
 import { deleteEvent } from "../../Features/eventSlice";
+import { AppDispatch } from "../../Store/store";
+import { Event } from "../../types/eventTypes";
 
-function MyVerticallyCenteredModal({ show, onHide, event }) {
-  const dispatch = useDispatch();
-  const handleSubmit = (e) => {
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+  event,
+}: {
+  show: boolean;
+  onHide: () => void;
+  event: Event;
+}) {
+  const dispatch = useDispatch<AppDispatch>();
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onHide();
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body>
         <form
           onSubmit={handleSubmit}
@@ -20,7 +30,7 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
           <h5>Delete event named "{event.name}"?</h5>
           <button
             className="btn btn-dark mt-2"
-            onClick={() => dispatch(deleteEvent(event._id))}
+            onClick={() => event._id && dispatch(deleteEvent(event._id))}
           >
             Confirm Delete
           </button>
@@ -30,7 +40,7 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
   );
 }
 
-const DeleteEvent = ({ event }) => {
+const DeleteEvent = ({ event }: { event: Event }) => {
   const [modalShow, setModalShow] = useState(false);
 
   return (

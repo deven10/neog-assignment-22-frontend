@@ -1,15 +1,17 @@
 export type Role = {
+  _id?: string;
   role: string;
-  volunteersRequired: string | number;
+  // volunteersRequired?: string | number;
+  volunteersRequired?: any;
 };
 
 export type Event = {
-  _id: string;
+  _id?: any;
   name: string;
   date: string;
   location: string;
   description: string;
   roles: Role[];
-  volunteersRequired: number;
+  volunteersRequired?: any;
   actions?: React.ReactNode;
 };

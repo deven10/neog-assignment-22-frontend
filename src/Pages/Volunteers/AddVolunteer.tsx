@@ -8,6 +8,8 @@ import makeAnimated from "react-select/animated";
 const animatedComponents = makeAnimated();
 
 import { addVolunteer } from "../../Features/volunteerSlice";
+import { Event } from "../../types/eventTypes";
+import { AppDispatch } from "../../Store/store";
 
 const volunteerRoleOptions = [
   { label: "Photographer", value: "Photographer" },
@@ -16,51 +18,82 @@ const volunteerRoleOptions = [
   { label: "Child Taker", value: "Child Taker" },
 ];
 
-function MyVerticallyCenteredModal({ show, onHide, events }) {
-  const dispatch = useDispatch();
-  const [volunteer, setVolunteer] = useState({
+type SelectBoxType = {
+  label: string;
+  value: string;
+};
+
+import { MultiValue } from "react-select";
+
+interface Volunteer {
+  name: string;
+  contact: string;
+  availability: string;
+  roles: MultiValue<SelectBoxType>;
+  skills: MultiValue<SelectBoxType>;
+  interests: MultiValue<SelectBoxType>;
+  events?: MultiValue<SelectBoxType>;
+  actions?: React.ReactNode;
+}
+
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+  events,
+}: {
+  show: boolean;
+  onHide: () => void;
+  events: Event[];
+}) {
+  const dispatch = useDispatch<AppDispatch>();
+  const [volunteer, setVolunteer] = useState<Volunteer>({
     name: "",
     contact: "",
     availability: "",
-    roles: "",
-    skills: "",
-    interests: "",
-    events: "",
+    roles: [],
+    skills: [],
+    interests: [],
+    events: [],
   });
 
   const eventOptions = useMemo(() => {
-    return events?.map((event) => ({
-      label: event?.name,
+    return events?.map((event: Event) => ({
+      label: event.name,
       value: event?._id,
     }));
   }, [events]);
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setVolunteer((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const { name, contact, availability, roles, skills, interests, events } =
       volunteer;
 
+    console.log("volunteer: ", volunteer);
+
     const bool =
       [name, contact, availability].every((a) => Boolean(a.trim())) &&
-      [roles, skills, interests, events].every((a) => a.length > 0);
+      [roles, skills, interests, events].every((a) => a && a.length > 0);
 
     if (bool) {
-      const newVolunteerDetails = { ...volunteer };
-      delete newVolunteerDetails.events;
-      delete newVolunteerDetails.interests;
-      delete newVolunteerDetails.roles;
-      delete newVolunteerDetails.skills;
+      const joinData = (dataset: SelectBoxType[]) =>
+        dataset.map((data: SelectBoxType) => data.value);
 
-      const joinData = (dataset) => dataset.map((data) => data.value);
-      newVolunteerDetails.events = joinData(volunteer?.events);
-      newVolunteerDetails.interests = joinData(volunteer?.interests);
-      newVolunteerDetails.roles = joinData(volunteer?.roles);
-      newVolunteerDetails.skills = joinData(volunteer?.skills);
+      const newVolunteerDetails = {
+        ...volunteer,
+        events: joinData([...(volunteer.events ?? [])]),
+        interests: joinData([...(volunteer.interests ?? [])]),
+        roles: joinData([...(volunteer.roles ?? [])]),
+        skills: joinData([...(volunteer.skills ?? [])]),
+      };
+
+      console.log("newVolunteerDetails: ", newVolunteerDetails);
 
       dispatch(addVolunteer(newVolunteerDetails));
       onHide();
@@ -68,30 +101,46 @@ function MyVerticallyCenteredModal({ show, onHide, events }) {
         name: "",
         contact: "",
         availability: "",
-        roles: "",
-        skills: "",
-        interests: "",
-        events: "",
+        roles: [],
+        skills: [],
+        interests: [],
+        events: [],
       });
     } else {
-      const conditions = {
-        [!interests.length > 0]: "Please add atleast 1 interest",
-        [!skills.length > 0]: "Please add atleast 1 skill",
-        [!events.length > 0]: "Please add atleast 1 event",
-        [!roles.length > 0]: "Please add atleast 1 volunteer role",
-        [!Boolean(availability.trim())]: "Please enter volunteer availability",
-        [!Boolean(contact.trim())]: "Please enter volunteer contact",
-        [!Boolean(name.trim())]: "Please enter volunteer name",
+      const validateVolunteer = () => {
+        if (!name.trim()) {
+          return "Please enter volunteer name";
+        }
+        if (!contact.trim()) {
+          return "Please enter volunteer contact";
+        }
+        if (!availability) {
+          return "Please enter volunteer availability";
+        }
+        if (roles.length <= 0) {
+          return "Please add atleast 1 volunteer role";
+        }
+        if (!events || events.length <= 0) {
+          return "Please add atleast 1 event";
+        }
+        if (skills.length <= 0) {
+          return "Please add atleast 1 skill";
+        }
+        if (interests.length <= 0) {
+          return "Please add atleast 1 interest";
+        }
+        return null;
       };
-      const error = conditions[true];
-      if (error) {
-        toast.error(error);
+
+      const validationError = validateVolunteer();
+      if (validationError) {
+        toast.error(validationError);
       }
     }
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body>
         <form
           onSubmit={handleSubmit}
@@ -218,7 +267,7 @@ function MyVerticallyCenteredModal({ show, onHide, events }) {
   );
 }
 
-const AddVolunteer = ({ events }) => {
+const AddVolunteer = ({ events }: { events: Event[] }) => {
   const [modalShow, setModalShow] = useState(false);
 
   return (

@@ -44,7 +44,7 @@ export const fetchEvents = createAsyncThunk<
 // add new event
 export const addEvent = createAsyncThunk<
   Event, // Success type
-  void, // Argument type (args)
+  Event, // Argument type (args)
   { rejectValue: string } // Rejected value type
 >("events/addEvent", async (body, { rejectWithValue }) => {
   try {
@@ -97,7 +97,7 @@ export const updateEvent = createAsyncThunk<
 // delete an existing student
 export const deleteEvent = createAsyncThunk<
   Event, // Success type
-  void, // Argument type (args)
+  string, // Argument type (args)
   { rejectValue: string } // Rejected value type
 >("events/deleteEvent", async (eventId, { rejectWithValue }) => {
   try {

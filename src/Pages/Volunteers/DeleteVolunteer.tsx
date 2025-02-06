@@ -2,16 +2,26 @@ import { useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import { useDispatch } from "react-redux";
 import { deleteVolunteer } from "../../Features/volunteerSlice";
+import { AppDispatch } from "../../Store/store";
+import { Volunteer } from "../../types/volunteerTypes";
 
-function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
-  const dispatch = useDispatch();
-  const handleSubmit = (e) => {
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+  volunteer,
+}: {
+  show: boolean;
+  onHide: () => void;
+  volunteer: Volunteer;
+}) {
+  const dispatch = useDispatch<AppDispatch>();
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onHide();
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body>
         <form
           onSubmit={handleSubmit}
@@ -30,7 +40,7 @@ function MyVerticallyCenteredModal({ show, onHide, volunteer }) {
   );
 }
 
-const DeleteVolunteer = ({ volunteer }) => {
+const DeleteVolunteer = ({ volunteer }: { volunteer: Volunteer }) => {
   const [modalShow, setModalShow] = useState(false);
 
   return (

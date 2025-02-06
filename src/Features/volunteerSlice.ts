@@ -44,7 +44,7 @@ export const fetchVolunteers = createAsyncThunk<
 // add new Volunteer
 export const addVolunteer = createAsyncThunk<
   Volunteer, // Success type
-  void, // Argument type (args)
+  Volunteer, // Argument type (args)
   { rejectValue: string } // Rejected value type
 >("volunteers/addVolunteer", async (body, { rejectWithValue }) => {
   try {
@@ -97,7 +97,7 @@ export const updateVolunteer = createAsyncThunk<
 // delete an existing volunteer
 export const deleteVolunteer = createAsyncThunk<
   Volunteer, // Success type
-  void, // Argument type (args)
+  string, // Argument type (args)
   { rejectValue: string } // Rejected value type
 >("volunteers/deleteVolunteer", async (volunteerId, { rejectWithValue }) => {
   try {

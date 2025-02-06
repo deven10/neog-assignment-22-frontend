@@ -1,25 +1,39 @@
 import { useState, useMemo } from "react";
 import Modal from "react-bootstrap/Modal";
 import { formatDate } from "../../../utils/utilityFunctions";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "../../hooks/useAppSelector";
+import { Event, Role } from "../../types/eventTypes";
 
-function MyVerticallyCenteredModal({ show, onHide, event }) {
-  const { volunteers } = useSelector((state) => state?.volunteers);
+function MyVerticallyCenteredModal({
+  show,
+  onHide,
+  event,
+}: {
+  show: boolean;
+  onHide: () => void;
+  event: Event;
+}) {
+  const { volunteers } = useAppSelector((state) => state?.volunteers);
   const assignedVolunteers = useMemo(() => {
+    if (!event?._id) return [];
+
     const result = volunteers?.filter((volunteer) => {
-      if (volunteer?.events?.includes(event._id)) {
+      if (volunteer?.events?.includes(event?._id)) {
         return volunteer;
       }
     });
     return result;
   }, [volunteers, event._id]);
 
-  const volunteersRequired = (roles) => {
-    return roles.reduce((acc, curr) => (acc += +curr.volunteersRequired), 0);
+  const volunteersRequired = (roles: Role[]) => {
+    return roles.reduce(
+      (acc, curr) => (acc += +curr.volunteersRequired || 0),
+      0
+    );
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="md" centered>
+    <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Body className="text-center px-4">
         <div className="d-flex justify-content-start gap-2">
           <h3 className="m-0" style={{ fontWeight: "600" }}>
@@ -56,7 +70,7 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
           </p>
           <div className="mt-1 d-flex flex-wrap gap-2 justify-content-start align-items-start">
             {event?.roles?.map((role) => (
-              <p className="m-0 role badge" key={role._id}>
+              <p className="m-0 role badge" key={String(role._id)}>
                 {role.role}: {role.volunteersRequired}
               </p>
             ))}
@@ -70,7 +84,7 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
 
             <ul className="mt-1">
               {assignedVolunteers?.map((volunteer) => (
-                <li key={volunteer._id}>{volunteer?.name}</li>
+                <li key={String(volunteer._id)}>{volunteer?.name}</li>
               ))}
             </ul>
           </div>
@@ -84,7 +98,7 @@ function MyVerticallyCenteredModal({ show, onHide, event }) {
   );
 }
 
-const EventDetails = ({ event }) => {
+const EventDetails = ({ event }: { event: Event }) => {
   const [modalShow, setModalShow] = useState(false);
 
   return (

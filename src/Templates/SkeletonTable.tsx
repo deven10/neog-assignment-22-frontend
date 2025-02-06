@@ -1,13 +1,13 @@
 import Skeleton from "react-loading-skeleton";
 
-const SkeletonTable = ({ columnHeaders }) => {
+const SkeletonTable = ({ columnHeaders }: { columnHeaders: any[] }) => {
   const rowsCount = [1, 2, 3, 4, 5, 6, 7];
   return (
     <section className="ml-30 mr-40">
       <table className="table mt-4 text-center react-table">
         <thead className="react-table_thead">
           <tr className={``}>
-            {columnHeaders.map((header, index) => (
+            {columnHeaders.map((header: any, index: number) => (
               <th className="" key={index}>
                 {header}
               </th>
@@ -17,7 +17,7 @@ const SkeletonTable = ({ columnHeaders }) => {
         <tbody className="react-table_tbody">
           {rowsCount.map((_, idx) => (
             <tr className={``} key={idx}>
-              {columnHeaders.map((_, index) => (
+              {columnHeaders.map((_: any, index: number) => (
                 <th className="" key={index}>
                   <Skeleton />
                 </th>
