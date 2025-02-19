@@ -83,7 +83,6 @@ const Events = () => {
   // const columns2 = useMemo(() => tableColumns, []);
 
   const data = useMemo(() => {
-    console.log("events: ", events);
     return events;
   }, [events]);
 
@@ -102,7 +101,6 @@ const Events = () => {
   const columns = [
     columnHelper.accessor("_id", {
       cell: (info) => {
-        console.log("info: ", info);
         return info.row.index + 1;
       },
       header: () => <span>Sr no</span>,

@@ -1,22 +1,20 @@
 import Modal from "react-bootstrap/Modal";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import CreatableSelect from "react-select/creatable";
-import makeAnimated from "react-select/animated";
-
 import { addEvent } from "../../Features/eventSlice";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppDispatch } from "../../Store/store";
-import { Event, Role } from "../../types/eventTypes";
 
-const animatedComponents = makeAnimated();
+import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
+import { DevTool } from "@hookform/devtools";
 
-const volunteerRoleOptions = [
-  { label: "Photographer", value: "Photographer" },
-  { label: "Security", value: "Security" },
-  { label: "Crowd Handling", value: "Crowd Handling" },
-  { label: "Child Taker", value: "Child Taker" },
-];
+type FormData = {
+  name: string;
+  date: Date | string;
+  location: string;
+  description: string;
+  roles: { role: string; volunteersRequired: string | number }[];
+};
 
 function MyVerticallyCenteredModal({
   show,
@@ -68,7 +66,7 @@ function MyVerticallyCenteredModal({
     setEvent((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitOld = (e: React.FormEvent) => {
     e.preventDefault();
     const { name, date, location, description, roles } = event;
 
@@ -125,120 +123,158 @@ function MyVerticallyCenteredModal({
     }
   };
 
-  return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Body>
-        <form
-          onSubmit={handleSubmit}
-          className="d-flex w-100 m-auto flex-column justify-content-center align-items-center gap-2"
-        >
-          <div className="d-flex flex-column w-100">
-            <label htmlFor="name">Name: </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Name"
-              value={event.name}
-              onChange={(e) => handleChange(e)}
-              required
-            />
-          </div>
-          <div className="d-flex flex-column w-100">
-            <label htmlFor="date">Date: </label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              placeholder="Date"
-              value={event.date}
-              onChange={(e) => handleChange(e)}
-              required
-            />
-          </div>
-          <div className="d-flex flex-column w-100">
-            <label htmlFor="location">Location: </label>
-            <input
-              type="text"
-              id="location"
-              name="location"
-              placeholder="Location"
-              value={event.location}
-              onChange={(e) => handleChange(e)}
-              required
-            />
-          </div>
-          <div className="d-flex flex-column w-100">
-            <label htmlFor="description">Description: </label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              placeholder="Description"
-              value={event.description}
-              onChange={(e) => handleChange(e)}
-              required
-            />
-          </div>
-          <div className="d-flex flex-column w-100">
-            <label htmlFor="volunteerRoles">Volunteer Roles:</label>
-            {event.roles.map((role, index) => (
-              <div className="d-flex gap-2 mb-2" key={index}>
-                <input
-                  className="w-100"
-                  type="text"
-                  placeholder="Role"
-                  value={role.role}
-                  onChange={(e) => handleRole(e.target.value, index)}
-                  required
-                />
-                <input
-                  className="w-100"
-                  type="number"
-                  min={1}
-                  placeholder="volunteers required"
-                  value={role.volunteersRequired}
-                  onChange={(e) =>
-                    handleVolunteersRequired(e.target.value, index)
-                  }
-                  required
-                />
-                {event.roles.length > 1 && (
-                  <button
-                    className="btn btn-dark"
-                    style={{ width: "max-content" }}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setEvent((prev) => ({
-                        ...prev,
-                        roles: prev.roles.filter((r, i) => i !== index),
-                      }));
-                    }}
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
-            ))}
-            <button
-              className="btn btn-dark mt-1"
-              style={{ width: "max-content" }}
-              onClick={(e) => {
-                e.preventDefault();
-                setEvent((prev) => ({
-                  ...prev,
-                  roles: [...prev.roles, { role: "", volunteersRequired: "" }],
-                }));
-              }}
-            >
-              Add Role
-            </button>
-          </div>
+  // for react hook form
+  const {
+    register,
+    setValue,
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = useForm<FormData>({
+    defaultValues: {
+      roles: [{ role: "", volunteersRequired: "" }],
+    },
+  });
 
-          <button className="btn btn-dark mt-2">Add New Event</button>
-        </form>
-      </Modal.Body>
-    </Modal>
+  useEffect(() => {
+    console.log("errors: ", errors);
+  }, [errors]);
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "roles",
+  });
+
+  const onSubmit: SubmitHandler<FormData> = (data) => {
+    console.log("Form Submitted:", data);
+
+    dispatch(addEvent(data));
+    onHide();
+  };
+
+  return (
+    <>
+      <Modal show={show} onHide={onHide} size="lg" centered>
+        <Modal.Body>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="d-flex w-100 m-auto flex-column justify-content-center align-items-center gap-2"
+          >
+            {/* NAME */}
+            <div className="d-flex flex-column w-100">
+              <label htmlFor="name">Name: </label>
+              <input
+                id="name"
+                {...register("name", { required: "Name is required" })}
+              />
+              {errors.name && (
+                <p className="text-danger">{errors.name.message}</p>
+              )}
+            </div>
+            {/* DATE */}
+            <div className="d-flex flex-column w-100">
+              <label htmlFor="date">Date: </label>
+              <input
+                type="date"
+                id="date"
+                {...register("date", { required: "Date is required" })}
+              />
+              {errors.date && (
+                <p className="text-danger">{errors.date.message}</p>
+              )}
+            </div>
+            {/* LOCATION */}
+            <div className="d-flex flex-column w-100">
+              <label htmlFor="location">Location: </label>
+              <input
+                id="location"
+                {...register("location", { required: "Location is required" })}
+              />
+              {errors.location && (
+                <p className="text-danger">{errors.location.message}</p>
+              )}
+            </div>
+            {/* DESCRIPTION */}
+            <div className="d-flex flex-column w-100">
+              <label htmlFor="description">Description: </label>
+              <input
+                id="description"
+                {...register("description", {
+                  required: "Description is required",
+                })}
+              />
+              {errors.description && (
+                <p className="text-danger">{errors.description.message}</p>
+              )}
+            </div>
+            {/* VOLUNTEER ROLES */}
+            <div className="d-flex flex-column w-100">
+              <label htmlFor="volunteerRoles">Volunteer Roles:</label>
+              {fields.map((field, index) => (
+                <div className="d-flex gap-2 mb-2" key={field.id}>
+                  <div className="w-50">
+                    <input
+                      className="w-100"
+                      type="text"
+                      placeholder="Role"
+                      {...register(`roles.${index}.role`, {
+                        required: "Role is required",
+                      })}
+                    />
+                    {errors.roles?.[index]?.role && (
+                      <span className="text-danger">
+                        {errors.roles[index].role.message}
+                      </span>
+                    )}
+                  </div>
+                  <div className="w-50">
+                    <input
+                      className="w-100"
+                      type="number"
+                      min={1}
+                      placeholder="Volunteers required"
+                      {...register(`roles.${index}.volunteersRequired`, {
+                        required: "Volunteers is required",
+                        valueAsNumber: true,
+                      })}
+                    />
+                    {errors.roles?.[index]?.volunteersRequired && (
+                      <span className="text-danger">
+                        {errors.roles[index].volunteersRequired.message}
+                      </span>
+                    )}
+                  </div>
+                  {fields.length > 1 && (
+                    <button
+                      className="btn btn-dark"
+                      style={{ width: "max-content", height: "max-content" }}
+                      type="button"
+                      onClick={() => remove(index)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              <button
+                className="btn btn-dark mt-1"
+                style={{ width: "max-content" }}
+                type="button"
+                onClick={() => append({ role: "", volunteersRequired: "" })}
+              >
+                Add Role
+              </button>
+            </div>
+
+            <button className="btn btn-dark mt-2" type="submit">
+              Add New Event
+            </button>
+          </form>
+        </Modal.Body>
+      </Modal>
+      <DevTool control={control} />
+    </>
   );
 }
 
