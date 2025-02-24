@@ -1,12 +1,11 @@
 import Modal from "react-bootstrap/Modal";
-import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { addEvent } from "../../Features/eventSlice";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AppDispatch } from "../../Store/store";
-
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
+import { Event } from "../../types/eventTypes";
 
 type FormData = {
   name: string;
@@ -24,104 +23,6 @@ function MyVerticallyCenteredModal({
   onHide: () => void;
 }) {
   const dispatch = useDispatch<AppDispatch>();
-  const [event, setEvent] = useState({
-    name: "",
-    date: "",
-    location: "",
-    description: "",
-    roles: [
-      {
-        role: "",
-        volunteersRequired: "",
-      },
-    ],
-  });
-
-  const handleRole = (value: string, index: number) => {
-    const updatedRoles = event.roles.map((role, i) =>
-      i === index
-        ? { role: value, volunteersRequired: role.volunteersRequired }
-        : role
-    );
-    setEvent((prev) => ({
-      ...prev,
-      roles: updatedRoles,
-    }));
-  };
-
-  const handleVolunteersRequired = (value: string, index: number) => {
-    const updatedVolunteersRequired = event.roles.map((singleRole, i) =>
-      i === index
-        ? { role: singleRole.role, volunteersRequired: value }
-        : singleRole
-    );
-    setEvent((prev) => ({
-      ...prev,
-      roles: updatedVolunteersRequired,
-    }));
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setEvent((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmitOld = (e: React.FormEvent) => {
-    e.preventDefault();
-    const { name, date, location, description, roles } = event;
-
-    const bool =
-      [name, date, location, description].every((a) => Boolean(a.trim())) &&
-      roles.every(
-        ({ role, volunteersRequired }) =>
-          Boolean(role.trim()) && Boolean(volunteersRequired.toString())
-      );
-
-    if (bool) {
-      dispatch(addEvent(event));
-      onHide();
-      setEvent({
-        name: "",
-        date: "",
-        location: "",
-        description: "",
-        roles: [
-          {
-            role: "",
-            volunteersRequired: "",
-          },
-        ],
-      });
-    } else {
-      const validateEvent = () => {
-        if (
-          !roles.every(
-            ({ role, volunteersRequired }) => role.trim() && volunteersRequired
-          )
-        ) {
-          return "Please enter role & required volunteers, or remove the role";
-        }
-        if (!description.trim()) {
-          return "Please enter event description";
-        }
-        if (!location.trim()) {
-          return "Please enter event location";
-        }
-        if (!date.trim()) {
-          return "Please enter event date";
-        }
-        if (!name.trim()) {
-          return "Please enter event name";
-        }
-        return null;
-      };
-
-      const validationError = validateEvent();
-      if (validationError) {
-        toast.error(validationError);
-      }
-    }
-  };
 
   // for react hook form
   const {
@@ -130,15 +31,12 @@ function MyVerticallyCenteredModal({
     handleSubmit,
     formState: { errors },
     control,
+    reset,
   } = useForm<FormData>({
     defaultValues: {
       roles: [{ role: "", volunteersRequired: "" }],
     },
   });
-
-  useEffect(() => {
-    console.log("errors: ", errors);
-  }, [errors]);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -147,9 +45,9 @@ function MyVerticallyCenteredModal({
 
   const onSubmit: SubmitHandler<FormData> = (data) => {
     console.log("Form Submitted:", data);
-
-    dispatch(addEvent(data));
+    dispatch(addEvent(data as Event));
     onHide();
+    reset();
   };
 
   return (
@@ -163,6 +61,7 @@ function MyVerticallyCenteredModal({
             {/* NAME */}
             <div className="d-flex flex-column w-100">
               <label htmlFor="name">Name: </label>
+
               <input
                 id="name"
                 {...register("name", { required: "Name is required" })}
