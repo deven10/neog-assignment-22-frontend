@@ -9,7 +9,7 @@ type SelectBoxType = {
 export type Volunteer = {
   _id?: any;
   name: string;
-  contact: number | string;
+  contact: string;
   availability: string;
   skills: string[];
   roles: string[];
